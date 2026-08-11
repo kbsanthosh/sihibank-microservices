@@ -1,0 +1,12 @@
+
+build:
+  version: "1.0"
+
+loans:
+  message: "Welcome to SihiBank accounts related Prod APIs "
+  contactDetails:
+    name: "Kush - Prod Support Lead"
+    email: "kush@sihibank.com"
+  onCallSupport:
+    - (201) 100-300
+    - (201) 100-301

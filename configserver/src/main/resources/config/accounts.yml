@@ -1,0 +1,12 @@
+
+build:
+  version: "3.0"
+
+accounts:
+  message: "Welcome to SihiBank accounts related local APIs "
+  contactDetails:
+    name: "Santhosh Kb - Developer"
+    email: "santhoshkb@sihibank.com"
+  onCallSupport:
+    - (201) 100-100
+    - (201) 100-101

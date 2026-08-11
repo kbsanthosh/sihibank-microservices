@@ -1,0 +1,5 @@
+**/target/
+**/.idea/
+**/.DS_Store
+**/HELP.md
+documents/config/

@@ -1,0 +1,47 @@
+server:
+  port: 8071
+
+spring:
+  application:
+    name: configserver
+  profiles:
+    active: git
+    #active: native -- for classpath and file location config
+  cloud:
+    config:
+      server:
+        #native:
+        #search-locations:
+        #- "file:/Users/kb/Workspaces/microservices/sihibank/documents/config"
+        #search-locations: "classpath:/config"
+        git:
+          #uri: git@github.com:kbsanthosh/sihibank-config.git
+          uri: "https://github.com/kbsanthosh/sihibank-config.git"
+          clone-on-start: true
+          default-label: main
+          timeout: 10
+          force-pull: true
+
+
+
+encrypt:
+  key: "99YSCNKOWJKLQJVNMKHUIHJLJNMQWEDSAXC85"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+
+
