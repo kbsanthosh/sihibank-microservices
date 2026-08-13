@@ -10,7 +10,9 @@
 	</parent>
 	<groupId>com.sihibank</groupId>
 	<artifactId>eurekaserver</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<!-- <version>0.0.1-SNAPSHOT</version> -->
+	<version>8.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<name/>
 	<description/>
 	<url/>
@@ -29,6 +31,7 @@
 	<properties>
 		<java.version>26</java.version>
 		<spring-cloud.version>2025.1.2</spring-cloud.version>
+		<docker.username>kbsanthosh</docker.username>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -68,6 +71,25 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.5.2</version> <!-- Your exact version -->
+				<configuration>
+					<from>
+						<!-- This tag forces Jib to use Alpine Linux + Java 26 -->
+						<image>eclipse-temurin:26-jre-alpine</image>
+					</from>
+					<to>
+						<image>${docker.username}/${project.artifactId}:${project.version}</image>
+					</to>
+				</configuration>
+			</plugin>
+
+
+
 		</plugins>
 	</build>
 
