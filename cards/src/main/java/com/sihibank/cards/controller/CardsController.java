@@ -35,12 +35,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
 @AllArgsConstructor
+//@RequiredArgsConstructor
 @Validated
 public class CardsController {
 
-    private ICardsService iCardsService;
+    //private ICardsService iCardsService;
+    private final ICardsService iCardsService;
+
 
     public CardsController(ICardsService iCardsService) {
+
         this.iCardsService = iCardsService;
     }
 
@@ -52,7 +56,8 @@ public class CardsController {
     private CardsContactInfoDto cardsContactInfoDto;
 
     @Autowired
-    public CardsController(Environment environment, CardsContactInfoDto cardsContactInfoDto) {
+    public CardsController(ICardsService iCardsService, Environment environment, CardsContactInfoDto cardsContactInfoDto) {
+        this.iCardsService = iCardsService;
         this.environment = environment;
         this.cardsContactInfoDto = cardsContactInfoDto;
     }
