@@ -5,55 +5,46 @@ networks:
 
 services:
 
-  rabbitmq:
-    image: rabbitmq:4-management
-    hostname: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      # Fixed to use modern array format syntax with underscores for RabbitMQ 4
-      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
-      #test: rabbitmq-diagnostics check_port_connectivity
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      #start_period: 5s
-      start_period: 15s # Increased slightly to prevent premature unhealthy status
-    extends:
-      file: common-config.yml
-      service: network-deploy-service
-
   configserver:
-    image: "santhoshkb/configserver:v6"
+    image: "kbsanthosh/configserver:8.0.0-SNAPSHOT"
     container_name: configserver-rest-api
     ports:
       - "8071:8071"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     healthcheck:
-      #test: "curl --fail --silent http://localhost:8071/actuator/health/readiness | grep UP || exit 1"
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8071/actuator/health/readiness | grep UP || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8071/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
-      #start_period: 10s
       start_period: 30s # Essential: Gives the Spring Boot JVM time to warm up before counting failures
-    #environment:
-     # SPRING_RABBITMQ_HOST: rabbitmq
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+
+  eurekaserver:
+    image: "kbsanthosh/eurekaserver:8.0.0-SNAPSHOT"
+    container_name: eurekaserver-rest-api
+    ports:
+      - "8070:8070"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: eurekaserver
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8070/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s # Essential: Gives the Spring Boot JVM time to warm up before counting failures
     extends:
       file: common-config.yml
       service: microservice-base-config
 
   accounts:
-    image: "santhoshkb/accounts:v6"
+    image: "kbsanthosh/accounts:8.0.0-SNAPSHOT"
     container_name: accounts-rest-api
     ports:
       - "8080:8080"
-    depends_on:
-      configserver:
-        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: accounts
     extends:
@@ -61,15 +52,10 @@ services:
       service: microservice-configserver-config
 
   loans:
-    image: "santhoshkb/loans:v6"
+    image: "kbsanthosh/loans:8.0.0-SNAPSHOT"
     container_name: loans-rest-api
     ports:
       - "8090:8090"
-    depends_on:
-      configserver:
-        condition: service_healthy
-      #accounts:
-       # condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: loans
     extends:
@@ -77,17 +63,10 @@ services:
       service: microservice-configserver-config
 
   cards:
-    image: "santhoshkb/cards:v6"
+    image: "kbsanthosh/cards:8.0.0-SNAPSHOT"
     container_name: cards-rest-api
     ports:
       - "9000:9000"
-    depends_on:
-      configserver:
-        condition: service_healthy
-      #accounts:
-       # condition: service_healthy
-      #loans:
-       # condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: cards
     extends:

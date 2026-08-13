@@ -1,8 +1,16 @@
+server:
+  port: 8070
+
 spring:
   application:
     name: eurekaserver
   config:
     import: "optional:configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:8071}"
+
+eureka:
+  client:
+    registerWithEureka: false # Eureka shouldn't register with itself
+    fetchRegistry: false      # Eureka doesn't need to pull its own registry
 
 management:
   endpoints:
