@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Fixed with Environment Variables)
+  # JOB 2: PARALLEL NATIVE BUILD (Overriding the config import location string)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,12 +70,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Env block injects these directly into the forked JVM runtime context
+      # FIXED: Replaces the 'configserver:' prefix with an optional configuration flag so Spring's resolver passes safely
       - name: Pre-compile and Process Spring AOT
         env:
           SPRING_CLOUD_CONFIG_ENABLED: "false"
           SPRING_CLOUD_DISCOVERY_ENABLED: "false"
-          SPRING_CONFIG_IMPORT: ""  # Clears the config server lookup rule completely
+          SPRING_CONFIG_IMPORT: "optional:configserver:http://localhost:8071" # Adding 'optional:' completely stops it from crashing when offline
         run: |
           mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot -DskipTests
 
