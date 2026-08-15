@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/api-gateway # ADD THIS LINE: Tells Jib to build containers for your gateway branch too!
 
 jobs:
   build-and-push-images:
