@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Bypassing JUnit Unit/Integration Tests)
+  # JOB 2: PARALLEL NATIVE BUILD (With Automatic Image Publishing)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,7 +70,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Patches local application configurations cleanly to ensure the compiler layer stays green
       - name: Modify Configuration Files for Build Time
         run: |
           YML_FILE="${{ matrix.service }}/src/main/resources/application.yml"
@@ -89,20 +88,18 @@ jobs:
             sed -i 's/spring.cloud.config.fail-fast=true/spring.cloud.config.fail-fast=false/g' "$PROP_FILE"
           fi
 
-      # Pre-compiles application code while ensuring JUnit sweeps are skipped
-      # This generates the clean target assets needed by the next phase
       - name: Pre-compile Application Code
         run: |
           mvn -f ${{ matrix.service }}/pom.xml clean package -DskipTests -Dspring.aot.enabled=false
 
-      # FIXED: Packages the native image using the exact targets compiled above.
-      # We pass -DskipTests explicitly here as well to keep the buildpack from running tests inside the container engine.
+      # FIXED: Added the publish=true configuration flag so the image is pushed directly to Docker Hub
       - name: Build and Push Native Image (GraalVM)
         run: |
           PROJECT_VERSION=$(mvn -f ${{ matrix.service }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
           
           mvn -f ${{ matrix.service }}/pom.xml spring-boot:build-image \
             -DskipTests \
+            -Dspring-boot.build-image.publish=true \
             -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${PROJECT_VERSION}-native \
             -Dspring-boot.build-image.buildpacks=gcr.io/paketo-buildpacks/java-native-image \
             -Dspring-boot.build-image.env.BP_NATIVE_IMAGE_BUILD_ARGUMENTS="--no-fallback"
