@@ -7,7 +7,7 @@ on:
 
 jobs:
   # -------------------------------------------------------------
-  # JOB 1: FAST JVM MICROSERVICES BUILD (Your automated Jib flow)
+  # JOB 1: FAST JVM MICROSERVICES BUILD (Your verified Jib flow)
   # -------------------------------------------------------------
   build-and-push-images:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Bypassing AOT Internal Resolver)
+  # JOB 2: PARALLEL NATIVE BUILD (Using AOT Profile Injector)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,15 +70,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Re-arranges properties into systemic Spring Boot runtime system properties (-Dspring-boot.aot.jvmArguments)
-      # This directly forces the internal Spring context resolver to use 'optional' mode inside the hardcoded execution block
+      # FIXED: Creates a temporary properties file to bypass the offline config server check safely
+      - name: Inject Temporary AOT Build Profile
+        run: |
+          TARGET_DIR="${{ matrix.service }}/src/main/resources"
+          mkdir -p "$TARGET_DIR"
+          echo "spring.config.import=optional:configserver:http://localhost:8071" > "$TARGET_DIR/application-aot.properties"
+          echo "spring.cloud.config.enabled=false" >> "$TARGET_DIR/application-aot.properties"
+          echo "spring.cloud.discovery.enabled=false" >> "$TARGET_DIR/application-aot.properties"
+
+      # Pre-packages the target resources with the 'aot' active profile configuration active
       - name: Pre-compile and Process Spring AOT
         run: |
           mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot \
             -DskipTests \
-            -Dspring-boot.aot.jvmArguments="-Dspring.config.import=optional:configserver:http://localhost:8071 -Dspring.cloud.config.enabled=false -Dspring.cloud.discovery.enabled=false"
+            -Dspring.profiles.active=aot
 
-      # Generates the Native Image from the static target assets
+      # Generates the Native Image from the isolated assets
       - name: Build and Push Native Image (GraalVM)
         run: |
           PROJECT_VERSION=$(mvn -f ${{ matrix.service }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
