@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Fixed Config Server Bypass)
+  # JOB 2: PARALLEL NATIVE BUILD (Fixed with Environment Variables)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,13 +70,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Passes system arguments to explicitly disable the Config Client check during AOT generation
+      # FIXED: Env block injects these directly into the forked JVM runtime context
       - name: Pre-compile and Process Spring AOT
+        env:
+          SPRING_CLOUD_CONFIG_ENABLED: "false"
+          SPRING_CLOUD_DISCOVERY_ENABLED: "false"
+          SPRING_CONFIG_IMPORT: ""  # Clears the config server lookup rule completely
         run: |
-          mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot \
-            -DskipTests \
-            -Dspring.cloud.config.enabled=false \
-            -Dspring.cloud.discovery.enabled=false
+          mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot -DskipTests
 
       # Generates the Native Image from the static target assets
       - name: Build and Push Native Image (GraalVM)
