@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Bypassing Dynamic Refresh Scopes)
+  # JOB 2: PARALLEL NATIVE BUILD (Bypassing Dynamic Refresh Scopes via Buildpacks)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,8 +70,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Appends refresh disabling flags directly into the configuration layers
-      # This prevents the dynamic proxy generator from triggering during AOT tree-shaking
+      # FIXED: Temporarily modifies your local configuration strings right before compiling.
+      # It adds 'optional:' to config imports and turns off fail-fast properties.
       - name: Modify Configuration Files for Build Time
         run: |
           YML_FILE="${{ matrix.service }}/src/main/resources/application.yml"
@@ -82,29 +82,25 @@ jobs:
             sed -i 's/configserver:/optional:configserver:/g' "$YML_FILE"
             sed -i 's/fail-fast: true/fail-fast: false/g' "$YML_FILE"
             sed -i 's/failFast: true/failFast: false/g' "$YML_FILE"
-            echo "  cloud:" >> "$YML_FILE"
-            echo "    refresh:" >> "$YML_FILE"
-            echo "      enabled: false" >> "$YML_FILE"
           fi
           
           if [ -f "$PROP_FILE" ]; then
             echo "Patching application.properties..."
             sed -i 's/spring.config.import=configserver:/spring.config.import=optional:configserver:/g' "$PROP_FILE"
             sed -i 's/spring.cloud.config.fail-fast=true/spring.cloud.config.fail-fast=false/g' "$PROP_FILE"
-            echo "spring.cloud.refresh.enabled=false" >> "$PROP_FILE"
           fi
 
-      # Pre-packages the target resources with the static configurations in place
-      - name: Pre-compile and Process Spring AOT
+      # FIXED: Bypasses the fragile process-aot goal at the maven level, allowing Paketo Buildpacks to safely compile it
+      - name: Pre-compile Application Code
         run: |
-          mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot -DskipTests
+          mvn -f ${{ matrix.service }}/pom.xml clean package -DskipTests -Dspring.aot.enabled=false
 
-      # Generates the Native Image from the isolated assets
+      # Generates the Native Image securely using Paketo's robust system compiler container
       - name: Build and Push Native Image (GraalVM)
         run: |
           PROJECT_VERSION=$(mvn -f ${{ matrix.service }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
           
-          mvn -f ${{ matrix.service }}/pom.xml spring-boot:build-image-no-fork \
+          mvn -f ${{ matrix.service }}/pom.xml spring-boot:build-image \
             -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${PROJECT_VERSION}-native \
             -Dspring-boot.build-image.buildpacks=gcr.io/paketo-buildpacks/java-native-image \
             -Dspring-boot.build-image.env.BP_NATIVE_IMAGE_BUILD_ARGUMENTS="--no-fallback"
