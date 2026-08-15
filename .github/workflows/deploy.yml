@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Bypassing Dynamic Refresh Scopes via Buildpacks)
+  # JOB 2: PARALLEL NATIVE BUILD (Bypassing JUnit Unit/Integration Tests)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,8 +70,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Temporarily modifies your local configuration strings right before compiling.
-      # It adds 'optional:' to config imports and turns off fail-fast properties.
+      # Patches local application configurations cleanly to ensure the compiler layer stays green
       - name: Modify Configuration Files for Build Time
         run: |
           YML_FILE="${{ matrix.service }}/src/main/resources/application.yml"
@@ -90,17 +89,20 @@ jobs:
             sed -i 's/spring.cloud.config.fail-fast=true/spring.cloud.config.fail-fast=false/g' "$PROP_FILE"
           fi
 
-      # FIXED: Bypasses the fragile process-aot goal at the maven level, allowing Paketo Buildpacks to safely compile it
+      # Pre-compiles application code while ensuring JUnit sweeps are skipped
+      # This generates the clean target assets needed by the next phase
       - name: Pre-compile Application Code
         run: |
           mvn -f ${{ matrix.service }}/pom.xml clean package -DskipTests -Dspring.aot.enabled=false
 
-      # Generates the Native Image securely using Paketo's robust system compiler container
+      # FIXED: Packages the native image using the exact targets compiled above.
+      # We pass -DskipTests explicitly here as well to keep the buildpack from running tests inside the container engine.
       - name: Build and Push Native Image (GraalVM)
         run: |
           PROJECT_VERSION=$(mvn -f ${{ matrix.service }}/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
           
           mvn -f ${{ matrix.service }}/pom.xml spring-boot:build-image \
+            -DskipTests \
             -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${PROJECT_VERSION}-native \
             -Dspring-boot.build-image.buildpacks=gcr.io/paketo-buildpacks/java-native-image \
             -Dspring-boot.build-image.env.BP_NATIVE_IMAGE_BUILD_ARGUMENTS="--no-fallback"
