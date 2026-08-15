@@ -25,8 +25,12 @@ services:
     container_name: eurekaserver-rest-api
     ports:
       - "8070:8070"
+    depends_on:
+      configserver:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: eurekaserver
+      SPRING_CLOUD_CONFIG_URI: "http://configserver:8071"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8070/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
@@ -35,7 +39,7 @@ services:
       start_period: 30s # Essential: Gives the Spring Boot JVM time to warm up before counting failures
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-base-config
 
   accounts:
     image: "kbsanthosh/accounts:8.0.0-SNAPSHOT"
@@ -46,7 +50,7 @@ services:
       SPRING_APPLICATION_NAME: accounts
     extends:
       file: common-config.yml
-      service: microservice-eureka-config
+      service: microservice-configserver-config
 
   loans:
     image: "kbsanthosh/loans:8.0.0-SNAPSHOT"
@@ -57,7 +61,7 @@ services:
       SPRING_APPLICATION_NAME: loans
     extends:
       file: common-config.yml
-      service: microservice-eureka-config
+      service: microservice-configserver-config
 
   cards:
     image: "kbsanthosh/cards:8.0.0-SNAPSHOT"
@@ -68,5 +72,5 @@ services:
       SPRING_APPLICATION_NAME: cards
     extends:
       file: common-config.yml
-      service: microservice-eureka-config
+      service: microservice-configserver-config
 
