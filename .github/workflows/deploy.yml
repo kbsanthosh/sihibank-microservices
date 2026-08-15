@@ -7,7 +7,7 @@ on:
 
 jobs:
   # -------------------------------------------------------------
-  # JOB 1: FAST JVM MICROSERVICES BUILD (Your verified Jib flow)
+  # JOB 1: FAST JVM MICROSERVICES BUILD (Your original automated Jib flow)
   # -------------------------------------------------------------
   build-and-push-images:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
           mvn -f loans/pom.xml clean compile jib:build
 
   # -------------------------------------------------------------
-  # JOB 2: PARALLEL NATIVE BUILD (Using AOT Profile Injector)
+  # JOB 2: PARALLEL NATIVE BUILD (Bypassing AOT Internal Resolver via Sed)
   # -------------------------------------------------------------
   build-and-push-graalvm-native:
     runs-on: ubuntu-latest
@@ -70,21 +70,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Creates a temporary properties file to bypass the offline config server check safely
-      - name: Inject Temporary AOT Build Profile
+      # FIXED: Temporarily modifies your local configuration strings right before compiling so the isolated context bypasses the server check.
+      # It adds 'optional:' to config imports and turns off fail-fast properties.
+      - name: Modify Configuration Files for Build Time
         run: |
-          TARGET_DIR="${{ matrix.service }}/src/main/resources"
-          mkdir -p "$TARGET_DIR"
-          echo "spring.config.import=optional:configserver:http://localhost:8071" > "$TARGET_DIR/application-aot.properties"
-          echo "spring.cloud.config.enabled=false" >> "$TARGET_DIR/application-aot.properties"
-          echo "spring.cloud.discovery.enabled=false" >> "$TARGET_DIR/application-aot.properties"
+          YML_FILE="${{ matrix.service }}/src/main/resources/application.yml"
+          PROP_FILE="${{ matrix.service }}/src/main/resources/application.properties"
+          
+          if [ -f "$YML_FILE" ]; then
+            echo "Patching application.yml..."
+            sed -i 's/configserver:/optional:configserver:/g' "$YML_FILE"
+            sed -i 's/fail-fast: true/fail-fast: false/g' "$YML_FILE"
+            sed -i 's/failFast: true/failFast: false/g' "$YML_FILE"
+          fi
+          
+          if [ -f "$PROP_FILE" ]; then
+            echo "Patching application.properties..."
+            sed -i 's/spring.config.import=configserver:/spring.config.import=optional:configserver:/g' "$PROP_FILE"
+            sed -i 's/spring.cloud.config.fail-fast=true/spring.cloud.config.fail-fast=false/g' "$PROP_FILE"
+          fi
 
-      # Pre-packages the target resources with the 'aot' active profile configuration active
+      # Pre-packages the target resources with the safe configurations in place
       - name: Pre-compile and Process Spring AOT
         run: |
-          mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot \
-            -DskipTests \
-            -Dspring.profiles.active=aot
+          mvn -f ${{ matrix.service }}/pom.xml clean package spring-boot:process-aot -DskipTests
 
       # Generates the Native Image from the isolated assets
       - name: Build and Push Native Image (GraalVM)
