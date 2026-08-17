@@ -34,12 +34,20 @@ management:
         include:
           # - "refresh"
           - "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
   info:
     env:
       enabled: true
   endpoint:
     shutdown:
       access: unrestricted
+    health:
+      probes:
+        enabled: true
 
 
 eureka:
@@ -56,4 +64,11 @@ info:
     name: "loans"
     description: "Sihi Bank Loans Application"
     version: "1.0.0"
+
+
+logging:
+  level:
+    com:
+      sihibank:
+        loans: DEBUG
 

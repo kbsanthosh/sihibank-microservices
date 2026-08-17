@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: "gatewayserver"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  main:
+    web-application-type: reactive
+
+  # FIXED: Rewritten to target the strict spring-cloud-starter-gateway-server-webflux namespace
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+              lower-case-service-id: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: "gatewayserver"
+    description: "Sihi Bank Gateway Server Application"
+    version: "1.0.0"
+
+logging:
+  level:
+    com:
+      sihibank:
+        gatewayserver: DEBUG

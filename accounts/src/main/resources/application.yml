@@ -33,12 +33,21 @@ management:
         include:
          # - "refresh"
           - "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    shutdown:
+      access: unrestricted
   info:
     env:
       enabled: true
-  endpoint:
-    shutdown:
-      access: unrestricted
+
 
 
 eureka:
@@ -55,3 +64,9 @@ info:
     name: "accounts"
     description: "Sihi Bank Accounts Application"
     version: "1.0.0"
+
+logging:
+  level:
+    com:
+      sihibank:
+        accounts: DEBUG

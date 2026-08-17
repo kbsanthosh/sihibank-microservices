@@ -82,3 +82,19 @@ services:
       file: common-config.yml
       service: microservice-eureka-config
 
+
+  gatewayserver:
+    image: "kbsanthosh/gatewayserver:9.0.0-SNAPSHOT"
+    container_name: gatewayserver-rest-api
+    ports:
+      - "8072:8072"
+    environment:
+      SPRING_APPLICATION_NAME: gatewayserver
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+
