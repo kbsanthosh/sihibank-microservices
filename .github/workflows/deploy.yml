@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/api-gateway # ADD THIS LINE: Tells Jib to build containers for your gateway branch too!
 
 jobs:
   build-and-push-images:
@@ -46,3 +47,6 @@ jobs:
           
           echo "Building Loans Microservice..."
           mvn -f loans/pom.xml clean compile jib:build
+          
+          echo "Building New API Gateway Server..." # ADDED
+          mvn -f gatewayserver/pom.xml clean compile jib:build
