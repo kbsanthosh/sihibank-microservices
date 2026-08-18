@@ -24,6 +24,10 @@ spring:
     #  - "optional:configserver:http://localhost:8071"
     import: "configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:8071}"
       # - "configserver:http://localhost:8071"
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 
 
 management:
@@ -70,3 +74,13 @@ logging:
     com:
       sihibank:
         accounts: DEBUG
+
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        permitted-number-of-calls-in-half-open-state: 2
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
