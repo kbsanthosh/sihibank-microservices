@@ -6,7 +6,7 @@ networks:
 services:
 
   configserver:
-    image: "kbsanthosh/configserver:10.0.0-SNAPSHOT"
+    image: "kbsanthosh/configserver:10.1.0-SNAPSHOT"
     container_name: configserver-rest-api
     ports:
       - "8071:8071"
@@ -21,7 +21,7 @@ services:
       service: microservice-base-config
 
   eurekaserver:
-    image: "kbsanthosh/eurekaserver:10.0.0-SNAPSHOT"
+    image: "kbsanthosh/eurekaserver:10.1.0-SNAPSHOT"
     container_name: eurekaserver-rest-api
     ports:
       - "8070:8070"
@@ -38,7 +38,7 @@ services:
       service: microservice-configserver-config
 
   accounts:
-    image: "kbsanthosh/accounts:10.0.0-SNAPSHOT"
+    image: "kbsanthosh/accounts:10.1.0-SNAPSHOT"
     container_name: accounts-rest-api
     ports:
       - "8080:8080"
@@ -55,7 +55,7 @@ services:
       service: microservice-eureka-config
 
   loans:
-    image: "kbsanthosh/loans:10.0.0-SNAPSHOT"
+    image: "kbsanthosh/loans:10.1.0-SNAPSHOT"
     container_name: loans-rest-api
     ports:
       - "8090:8090"
@@ -72,7 +72,7 @@ services:
       service: microservice-eureka-config
 
 #  loans2:
-#    image: "kbsanthosh/loans:10.0.0-SNAPSHOT"
+#    image: "kbsanthosh/loans:10.1.0-SNAPSHOT"
 #    container_name: loans-rest-api-instance2
 #    ports:
 #      - "8091:8090"
@@ -90,7 +90,7 @@ services:
 
 
   cards:
-    image: "kbsanthosh/cards:10.0.0-SNAPSHOT"
+    image: "kbsanthosh/cards:10.1.0-SNAPSHOT"
     container_name: cards-rest-api
     ports:
       - "9000:9000"
@@ -108,7 +108,7 @@ services:
 
 
   gatewayserver:
-    image: "kbsanthosh/gatewayserver:10.0.0-SNAPSHOT"
+    image: "kbsanthosh/gatewayserver:10.1.0-SNAPSHOT"
     container_name: gatewayserver-rest-api
     ports:
       - "8072:8072"

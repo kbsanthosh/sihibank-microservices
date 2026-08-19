@@ -1,0 +1,19 @@
+server:
+  port: 8085  # Maps your GraphQL proxy service to a unique port
+
+spring:
+  application:
+    name: graphql
+  graphql:
+    graphiql:
+      enabled: true  # Activates the built-in UI tool
+      path: /graphiql # Optional: Customizes the web route (default is /graphiql)
+  mongodb:
+    # Crucial: 'data' has been stripped from the hierarchy path prefix
+    uri: mongodb://sihibank_admin:password123@localhost:27017/sihibank_db?authSource=admin
+  profiles:
+    active:
+      - local # Forces the Mongo seeder component to execute on boot
+
+
+
