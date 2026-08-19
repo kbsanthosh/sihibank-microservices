@@ -21,6 +21,7 @@
         <module name="gatewayserver" />
         <module name="cards" />
         <module name="accounts" />
+        <module name="graphql" />
         <module name="loans" />
       </profile>
     </annotationProcessing>
@@ -32,6 +33,7 @@
       <module name="configserver" options="-parameters" />
       <module name="eurekaserver" options="-parameters" />
       <module name="gatewayserver" options="-parameters" />
+      <module name="graphql" options="-parameters" />
       <module name="loans" options="-parameters" />
     </option>
   </component>

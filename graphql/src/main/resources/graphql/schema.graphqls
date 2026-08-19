@@ -1,0 +1,37 @@
+type Query {
+    # The client-facing entry point query
+    fetchCustomerSummary(mobileNumber: String!): CustomerSummaryPayload
+}
+
+# The root level JSON envelope
+type CustomerSummaryPayload {
+    customer: CustomerSummaryView
+}
+
+# The main customer data block with renamed target attributes
+type CustomerSummaryView {
+    fullName: String!
+    cellNumber: String!
+    emailId: String!
+    accounts: AccountDetails
+    cards: CardDetails
+    loans: LoanDetails
+    # New fields dynamically merged from Docker MongoDB
+    kycStatus: String
+    riskScore: Int
+}
+
+type AccountDetails {
+    number: String!
+    type: String!
+}
+
+type CardDetails {
+    number: String!
+    type: String!
+}
+
+type LoanDetails {
+    number: String!
+    type: String!
+}
