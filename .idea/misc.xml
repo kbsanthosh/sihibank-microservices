@@ -11,6 +11,7 @@
         <option value="$PROJECT_DIR$/eurekaserver/pom.xml" />
         <option value="$PROJECT_DIR$/gatewayserver/pom.xml" />
         <option value="$PROJECT_DIR$/graphql/pom.xml" />
+        <option value="$PROJECT_DIR$/../loans/pom.xml" />
       </list>
     </option>
   </component>

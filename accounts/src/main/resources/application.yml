@@ -84,3 +84,25 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 2
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10000
+
+
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 3
+      waitDuration: 500
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2
+      ignoreExceptions:
+        - java.lang.NullPointerException
+      retryExceptions:
+        - java.util.concurrent.TimeoutException
+
+resilience4j.ratelimiter:
+  configs:
+    default:
+      timeout-duration: 1000
+      limit-for-period: 1
+      limit-refresh-period: 5000
+
+
