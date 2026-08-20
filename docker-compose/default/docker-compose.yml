@@ -307,8 +307,9 @@ services:
     image: "kbsanthosh/cards:10.2.0-SNAPSHOT"
     container_name: cards-rest-api
     ports:
-      - "9000:9000"
+      - "9010:9000" # UPDATED: Changed host port to 9010 to resolve the clash with MinIO
     healthcheck:
+      # CRITICAL: Keep 'localhost:9000' here because inside the container it still listens on 9000
       test: ["CMD-SHELL", "wget -qO- http://localhost:9000/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
       timeout: 5s
