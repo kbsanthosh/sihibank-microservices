@@ -91,7 +91,7 @@ services:
 
 
   prometheus:
-    image: prom/prometheus:v3.14.0 # UPDATED: Changed from v3.8.0 to the current stable release    container_name: prometheus
+    image: prom/prometheus:v3.14.0 # UPDATED: Changed from v3.8.0 to the current stable release container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -113,7 +113,6 @@ services:
       - sh
       - -euc
       - |
-        EOF
         /run.sh
     ports:
       - "3000:3000"
