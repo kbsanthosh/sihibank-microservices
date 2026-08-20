@@ -11,7 +11,7 @@
 	<groupId>com.sihibank</groupId>
 	<artifactId>eurekaserver</artifactId>
 	<!-- <version>0.0.1-SNAPSHOT</version> -->
-	<version>10.2.0-SNAPSHOT</version>
+	<version>11.0.0-RELEASE</version>
 	<packaging>jar</packaging>
 	<name/>
 	<description/>
