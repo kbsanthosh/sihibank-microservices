@@ -218,15 +218,25 @@
 					<to>
 						<image>${docker.username}/${project.artifactId}:${project.version}</image>
 					</to>
-					<!-- ADD THIS BLOCK TO FIX PERMISSIONS -->
+					<!-- JIB NATIVELY DOWNLOADS AND ASSIGNS THE CORRECT PERMISSIONS FOR YOU -->
 					<extraDirectories>
+						<paths>
+							<path>
+								<!-- Downloads the real binary jar file over HTTPS instantly during packaging -->
+								<from>
+									<url>https://github.com</url>
+								</from>
+								<into>/app/libs/opentelemetry-javaagent-2.22.0.jar</into>
+							</path>
+						</paths>
 						<permissions>
 							<permission>
 								<file>/app/libs/opentelemetry-javaagent-2.22.0.jar</file>
-								<mode>755</mode> <!-- Grants Alpine Linux full execution rights -->
+								<mode>755</mode> <!-- Ensures execution permissions -->
 							</permission>
 						</permissions>
 					</extraDirectories>
+
 				</configuration>
 			</plugin>
 
