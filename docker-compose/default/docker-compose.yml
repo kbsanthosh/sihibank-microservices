@@ -100,6 +100,19 @@ services:
       file: common-config.yml
       service: network-deploy-service
 
+  tempo:
+    image: grafana/tempo:2.9.0
+    container_name: tempo
+    command: -config.file /etc/tempo-config.yml
+    ports:
+      - "3110:3100"
+      - "4318:4318"
+    volumes:
+      - ../observability/tempo/tempo.yml:/etc/tempo-config.yml
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
 
   grafana:
     image: grafana/grafana:latest
@@ -234,6 +247,8 @@ services:
     extends:
       file: common-config.yml
       service: microservice-base-config
+    environment:
+      OTEL_SERVICE_NAME: "configserver"
 
   eurekaserver:
     image: "kbsanthosh/eurekaserver:11.0.0-RELEASE"
@@ -242,6 +257,7 @@ services:
       - "8070:8070"
     environment:
       SPRING_APPLICATION_NAME: eurekaserver
+      OTEL_SERVICE_NAME: eurekaserver
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8070/actuator/health/readiness | grep UP || exit 1"]
       interval: 10s
@@ -265,6 +281,7 @@ services:
       start_period: 30s
     environment:
       SPRING_APPLICATION_NAME: accounts
+      OTEL_SERVICE_NAME: accounts
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -282,6 +299,7 @@ services:
       start_period: 30s
     environment:
       SPRING_APPLICATION_NAME: loans
+      OTEL_SERVICE_NAME: loans
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -318,6 +336,7 @@ services:
       start_period: 30s
     environment:
       SPRING_APPLICATION_NAME: cards
+      OTEL_SERVICE_NAME: cards
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -330,6 +349,7 @@ services:
       - "8072:8072"
     environment:
       SPRING_APPLICATION_NAME: gatewayserver
+      OTEL_SERVICE_NAME: gatewayserver
     depends_on:
       accounts:
         condition: service_healthy
