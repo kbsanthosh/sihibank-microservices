@@ -37,7 +37,7 @@ jobs:
       # 1. Build configserver and push container image using Jib
       - name: Build and Push Docker Image with Jib
         run: |
-          mvn clean compile jib:build -pl configserverpackage com.sihibank.observability;
+          mvn clean compile jib:build -pl configserver
           
 
       # 2. Builds others and pushes images with hard-mapped username secrets to prevent loop context erasure
