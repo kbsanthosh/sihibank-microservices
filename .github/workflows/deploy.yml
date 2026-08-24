@@ -27,21 +27,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 1. Injects the agent into Jib's universal overlay layer before compilation
-      - name: Inject OpenTelemetry Javaagent for Google Jib
+      # Download OpenTelemetry Java Agent into Jib's extra directory structure
+      - name: Download OpenTelemetry Java Agent
         run: |
-          SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
-          for SERVICE in "${SERVICES[@]}"; do
-            echo "Injecting agent dependency into $SERVICE..."
-            mkdir -p "$SERVICE/src/main/jib/app/libs"
-            curl -L -o "$SERVICE/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar" \
-              https://github.com
-          done
+          mkdir -p configserver/src/main/jib/app/libs
+          curl -L -o configserver/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar \
+            https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.22.0/opentelemetry-javaagent.jar
 
-      # 2. Builds and pushes images with hard-mapped username secrets to prevent loop context erasure
+      # 1. Build configserver and push container image using Jib
+      - name: Build and Push Docker Image with Jib
+        run: |
+          mvn clean compile jib:build -pl configserverpackage com.sihibank.observability;
+          
+
+      # 2. Builds others and pushes images with hard-mapped username secrets to prevent loop context erasure
       - name: Compile and Push Microservices
         run: |
-          SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
+          SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans")
           for SERVICE in "${SERVICES[@]}"; do
             echo "Building and pushing service image: $SERVICE"
             mvn -f "$SERVICE/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
