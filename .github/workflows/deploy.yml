@@ -30,19 +30,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 4. NEW STEP: Automatically download and inject the agent into Jib's source structure
-      - name: Inject OpenTelemetry Javaagent
+      # 4. CRITICAL STEP: Inject the exact OTel agent file into Jib's overlay directory for every service
+      - name: Inject OpenTelemetry Javaagent for Google Jib
         run: |
-          SERVICES=("configserver" "eurekaserver" "accounts" "cards" "loans" "gatewayserver")
+          SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
           for SERVICE in "${SERVICES[@]}"; do
-            mkdir -p $SERVICE/src/main/jib/app/libs/
-            curl -L -o $SERVICE/src/main/jib/app/libs/opentelemetry-javaagent.jar \
-            https://github.com
+            echo "Injecting agent into $SERVICE..."
+            mkdir -p "$SERVICE/src/main/jib/app/libs"
+            curl -L -o "$SERVICE/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar" \
+              https://github.com
           done
 
       # 5. Step into all 6 microservice folders individually and build via Jib
-      - name: Compile and Push Microservices
+      - name: Build and Push Microservice Images via Google Jib
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          for SERVICE in configserver eurekaserver accounts cards loans gatewayserver; do
-            mvn -f $SERVICE/pom.xml clean compile jib:build
+          SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
+          for SERVICE in "${SERVICES[@]}"; do
+            echo "Building and pushing $SERVICE..."
+            mvn -f "$SERVICE/pom.xml" compile jib:build -Ddocker.username="$DOCKER_USERNAME"
           done
