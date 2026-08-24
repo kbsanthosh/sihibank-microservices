@@ -218,6 +218,15 @@
 					<to>
 						<image>${docker.username}/${project.artifactId}:${project.version}</image>
 					</to>
+					<!-- ADD THIS BLOCK TO FIX PERMISSIONS -->
+					<extraDirectories>
+						<permissions>
+							<permission>
+								<file>/app/libs/opentelemetry-javaagent-2.22.0.jar</file>
+								<mode>755</mode> <!-- Grants Alpine Linux full execution rights -->
+							</permission>
+						</permissions>
+					</extraDirectories>
 				</configuration>
 			</plugin>
 

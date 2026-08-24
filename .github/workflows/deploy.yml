@@ -5,7 +5,7 @@ on:
     branches:
       - main
       #- feature/api-gateway
-      #- feature/jira-observability
+      - feature/jira-observability
 
 jobs:
   build-and-push-images:
