@@ -37,16 +37,15 @@ jobs:
               https://github.com
           done
 
-      # 1. FIXED: Replaced '-pl configserver' with '-f configserver/pom.xml' to bypass reactor lookup entirely
+      # 1. Keep configserver independent since it packages cleanly via direct file tracking
       - name: Build and Push Docker Image with Jib
         run: |
           mvn -f "configserver/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
 
-      # 2. Builds others and pushes images with hard-mapped username secrets
+      # 2. FIXED: Compile and group the rest using a single reactor sequence to preserve parent contexts
       - name: Compile and Push Microservices
         run: |
-          SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans")
-          for SERVICE in "${SERVICES[@]}"; do
-            echo "Building and pushing service image: $SERVICE"
-            mvn -f "$SERVICE/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
-          done
+          echo "Building interconnected reactor microservices..."
+          mvn clean compile jib:build \
+            -pl eurekaserver,gatewayserver,accounts,cards,loans \
+            -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
