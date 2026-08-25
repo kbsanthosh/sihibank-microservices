@@ -92,6 +92,10 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.14.0 # UPDATED: Changed from v3.8.0 to the current stable release container_name: prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-remote-write-receiver'
     ports:
       - "9090:9090"
     volumes:
@@ -287,7 +291,7 @@ services:
       service: microservice-eureka-config
 
   loans:
-    image: "kbsanthosh/loans:c"
+    image: "kbsanthosh/loans:11.2.0-RELEASE"
     container_name: loans-rest-api
     ports:
       - "8090:8090"
