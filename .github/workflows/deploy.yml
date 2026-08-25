@@ -33,8 +33,8 @@ jobs:
           for SERVICE in "${ALL_SERVICES[@]}"; do
             echo "Injecting valid binary agent dependency into $SERVICE..."
             mkdir -p "$SERVICE/src/main/jib/app/libs"
-            curl -L -o "$SERVICE/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar" \
-              https://github.com
+            curl -L -f -o "$SERVICE/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar" \
+            https://repo.maven.apache.org/maven2/io/opentelemetry/javaagent/opentelemetry-javaagent/2.22.0/opentelemetry-javaagent-2.22.0.jar
           done
 
       # 1. Build and deploy configserver via explicit target path properties
