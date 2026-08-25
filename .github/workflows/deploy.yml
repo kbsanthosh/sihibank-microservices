@@ -37,15 +37,25 @@ jobs:
               https://github.com
           done
 
-      # 1. Keep configserver independent since it packages cleanly via direct file tracking
+      # 1. First, build and install all local modules so parent dependencies resolve correctly
+      - name: Pre-install All Maven Artifacts
+        run: |
+          SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
+          for SERVICE in "${SERVICES[@]}"; do
+            echo "Pre-installing local dependencies for: $SERVICE"
+            mvn -f "$SERVICE/pom.xml" clean install -DskipTests jib:build@none
+          done
+
+      # 2. Build configserver and push container image using Jib
       - name: Build and Push Docker Image with Jib
         run: |
-          mvn -f "configserver/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+          mvn -f "configserver/pom.xml" compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
 
-      # 2. FIXED: Compile and group the rest using a single reactor sequence to preserve parent contexts
-      - name: Compile and Push Microservices
+      # 3. Safely process individual microservice push actions one by one
+      - name: Compile and Push Remaining Microservices
         run: |
-          echo "Building interconnected reactor microservices..."
-          mvn clean compile jib:build \
-            -pl eurekaserver,gatewayserver,accounts,cards,loans \
-            -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+          SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans")
+          for SERVICE in "${SERVICES[@]}"; do
+            echo "Building and pushing service image: $SERVICE"
+            mvn -f "$SERVICE/pom.xml" compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+          done
