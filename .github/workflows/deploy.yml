@@ -33,11 +33,10 @@ jobs:
           curl -L -o configserver/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar \
             https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.22.0/opentelemetry-javaagent.jar
 
-      # 1. Build configserver and push container image using Jib
+      # 1. FIXED: Changed from -pl to -f to point directly to the project file
       - name: Build and Push Docker Image with Jib
         run: |
-          mvn clean compile jib:build -pl configserver
-          
+          mvn -f "configserver/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
 
       # 2. Builds others and pushes images with hard-mapped username secrets to prevent loop context erasure
       - name: Compile and Push Microservices
