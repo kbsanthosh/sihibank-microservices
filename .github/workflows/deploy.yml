@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # FIXED: Loop through ALL microservices to inject the agent into Jib's structure
+      # Download OpenTelemetry Java Agent into Jib's extra directory structure for ALL services
       - name: Download OpenTelemetry Java Agent
         run: |
           ALL_SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
@@ -37,11 +37,10 @@ jobs:
               https://github.com
           done
 
-      # 1. Build configserver and push container image using Jib
+      # 1. FIXED: Added the explicit -Ddocker.username argument flag to resolve the Jib target namespace
       - name: Build and Push Docker Image with Jib
         run: |
           mvn clean compile jib:build -pl configserver -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
-      
 
       # 2. Builds others and pushes images with hard-mapped username secrets
       - name: Compile and Push Microservices
