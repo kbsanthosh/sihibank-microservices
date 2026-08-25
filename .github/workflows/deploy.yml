@@ -26,36 +26,27 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Download OpenTelemetry Java Agent into Jib's extra directory structure for ALL services
+      # Download valid OpenTelemetry Java Agent binaries into the workspace overlay layers
       - name: Download OpenTelemetry Java Agent
         run: |
           ALL_SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
           for SERVICE in "${ALL_SERVICES[@]}"; do
-            echo "Injecting OpenTelemetry Java Agent into $SERVICE..."
+            echo "Injecting valid binary agent dependency into $SERVICE..."
             mkdir -p "$SERVICE/src/main/jib/app/libs"
             curl -L -o "$SERVICE/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar" \
               https://github.com
           done
 
-      # 1. First, build and install all local modules so parent dependencies resolve correctly
-      - name: Pre-install All Maven Artifacts
+      # 1. Build and deploy configserver via explicit target path properties
+      - name: Build and Push Configserver
         run: |
-          SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
-          for SERVICE in "${SERVICES[@]}"; do
-            echo "Pre-installing local dependencies for: $SERVICE"
-            mvn -f "$SERVICE/pom.xml" clean install -DskipTests jib:build@none
-          done
+          mvn -f "configserver/pom.xml" clean compile jib:build -DskipTests -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
 
-      # 2. Build configserver and push container image using Jib
-      - name: Build and Push Docker Image with Jib
-        run: |
-          mvn -f "configserver/pom.xml" compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
-
-      # 3. Safely process individual microservice push actions one by one
+      # 2. Build and deploy the remaining cluster applications cleanly
       - name: Compile and Push Remaining Microservices
         run: |
           SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans")
           for SERVICE in "${SERVICES[@]}"; do
-            echo "Building and pushing service image: $SERVICE"
-            mvn -f "$SERVICE/pom.xml" compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+            echo "Processing independent service image layer: $SERVICE"
+            mvn -f "$SERVICE/pom.xml" clean compile jib:build -DskipTests -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
           done
