@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      #- feature/api-gateway
       - feature/jira-observability
 
 jobs:
