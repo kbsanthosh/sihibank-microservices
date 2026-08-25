@@ -26,19 +26,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Download OpenTelemetry Java Agent into Jib's extra directory structure
+      # FIXED: Loop through ALL microservices to inject the agent into Jib's structure
       - name: Download OpenTelemetry Java Agent
         run: |
-          mkdir -p configserver/src/main/jib/app/libs
-          curl -L -o configserver/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar \
-            https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.22.0/opentelemetry-javaagent.jar
+          ALL_SERVICES=("configserver" "eurekaserver" "gatewayserver" "accounts" "cards" "loans")
+          for SERVICE in "${ALL_SERVICES[@]}"; do
+            echo "Injecting OpenTelemetry Java Agent into $SERVICE..."
+            mkdir -p "$SERVICE/src/main/jib/app/libs"
+            curl -L -o "$SERVICE/src/main/jib/app/libs/opentelemetry-javaagent-2.22.0.jar" \
+              https://github.com
+          done
 
-      # 1. FIXED: Changed from -pl to -f to point directly to the project file
+      # 1. Build configserver and push container image using Jib
       - name: Build and Push Docker Image with Jib
         run: |
-          mvn -f "configserver/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+          mvn clean compile jib:build -pl configserver -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+      
 
-      # 2. Builds others and pushes images with hard-mapped username secrets to prevent loop context erasure
+      # 2. Builds others and pushes images with hard-mapped username secrets
       - name: Compile and Push Microservices
         run: |
           SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans")
