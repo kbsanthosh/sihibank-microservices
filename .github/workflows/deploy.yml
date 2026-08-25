@@ -37,10 +37,10 @@ jobs:
               https://github.com
           done
 
-      # 1. FIXED: Added the explicit -Ddocker.username argument flag to resolve the Jib target namespace
+      # 1. FIXED: Replaced '-pl configserver' with '-f configserver/pom.xml' to bypass reactor lookup entirely
       - name: Build and Push Docker Image with Jib
         run: |
-          mvn clean compile jib:build -pl configserver -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
+          mvn -f "configserver/pom.xml" clean compile jib:build -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
 
       # 2. Builds others and pushes images with hard-mapped username secrets
       - name: Compile and Push Microservices
