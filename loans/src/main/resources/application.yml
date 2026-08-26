@@ -48,6 +48,9 @@ management:
     health:
       probes:
         enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 
 eureka:
@@ -71,4 +74,6 @@ logging:
     com:
       sihibank:
         loans: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
