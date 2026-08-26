@@ -122,8 +122,11 @@ public class LoansController {
             @RequestParam
             @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
                                                      String mobileNumber) {
-        logger.debug("sihiBank-correlation-id found: {}", correlationId);
+        //logger.debug("sihiBank-correlation-id found: {}", correlationId);
+        logger.debug("fetchLoanDetails method start", correlationId);
         LoansDto loansDto = iLoansService.fetchLoan(mobileNumber);
+        logger.debug("fetchLoanDetails method end", correlationId);
+
         return ResponseEntity.status(HttpStatus.OK).body(loansDto);
     }
 

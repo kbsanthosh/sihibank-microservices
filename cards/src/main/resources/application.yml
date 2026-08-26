@@ -48,6 +48,9 @@ management:
     health:
       probes:
         enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 
 eureka:
@@ -66,11 +69,14 @@ info:
     version: "1.0.0"
 
 
+
 logging:
   level:
     com:
       sihibank:
         cards: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 
 

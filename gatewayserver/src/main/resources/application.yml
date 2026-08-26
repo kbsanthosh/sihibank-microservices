@@ -17,25 +17,31 @@ spring:
               lower-case-service-id: true
           httpclient:
             connect-timeout: 1000
-            response-timeout: 2s
-  data:
-    redis:
-      connect-timeout: 2s
-      host: localhost
-      port: 6379
-      timeout: 1s
+            response-timeout: 10s
+#  data:
+#    redis:
+#      connect-timeout: 2s
+#      host: localhost
+#      port: 6379
+#      timeout: 1s
 
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  health:
+    redis:
+      enabled: false  # FIX: Tells Actuator to completely stop checking Redis health
   endpoint:
     gateway:
       access: unrestricted
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 info:
   app:
@@ -48,6 +54,8 @@ logging:
     com:
       sihibank:
         gatewayserver: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 resilience4j:
   circuitbreaker:
