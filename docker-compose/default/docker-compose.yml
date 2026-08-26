@@ -345,7 +345,6 @@ services:
       file: common-config.yml
       service: microservice-eureka-config
 
-
   gatewayserver:
     image: "kbsanthosh/gatewayserver:11.2.0-RELEASE"
     container_name: gatewayserver-rest-api
