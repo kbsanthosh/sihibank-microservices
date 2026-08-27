@@ -3,8 +3,8 @@ name: CI/CD Microservice Pipeline
 on:
   push:
     branches:
-     # - main
-     # - feature/jira-observability
+      - main
+      - feature/jira-security-keycloak
 
 jobs:
   build-and-push-images:
