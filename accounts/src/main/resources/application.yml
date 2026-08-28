@@ -38,7 +38,7 @@ spring:
       kafka:
         binder:
           brokers:
-            - macbook-pro.tail20af21.ts.net:9092
+            - localhost:9092
     function:
       definition: updateCommunication
 
