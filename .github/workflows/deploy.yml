@@ -4,7 +4,7 @@ on:
   push:
     branches:
       #- main
-      - feature/jira-message-kafka
+      #- feature/jira-message-kafka
 
 jobs:
   build-and-push-images:

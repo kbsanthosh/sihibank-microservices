@@ -345,12 +345,13 @@ services:
       retries: 20
       start_period: 30s
     depends_on:
-      rabbit:
+      kafka:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: accounts
       OTEL_SERVICE_NAME: accounts
-      SPRING_RABBITMQ_HOST: rabbit
+      #SPRING_RABBITMQ_HOST: rabbit
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -415,10 +416,12 @@ services:
     image: "kbsanthosh/message:14.0.0-RELEASE"
     container_name: message-ms
     depends_on:
-      rabbit:
+      #rabbit:
+      kafka:
         condition: service_healthy
     environment:
-      SPRING_RABBITMQ_HOST: rabbit
+      #SPRING_RABBITMQ_HOST: rabbit
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
     extends:
       file: common-config.yml
       service: network-deploy-service
