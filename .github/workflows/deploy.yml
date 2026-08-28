@@ -45,7 +45,7 @@ jobs:
       # 2. Build and deploy the remaining cluster applications cleanly
       - name: Compile and Push Remaining Microservices
         run: |
-          SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans")
+          SERVICES=("eurekaserver" "gatewayserver" "accounts" "cards" "loans" "message")
           for SERVICE in "${SERVICES[@]}"; do
             echo "Processing independent service image layer: $SERVICE"
             mvn -f "$SERVICE/pom.xml" clean compile jib:build -DskipTests -Ddocker.username="${{ secrets.DOCKERHUB_USERNAME }}"
