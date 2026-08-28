@@ -267,7 +267,7 @@ services:
 
 
   configserver:
-    image: "kbsanthosh/configserver:13.0.0-RELEASE"
+    image: "kbsanthosh/configserver:14.0.0-RELEASE"
     container_name: configserver-rest-api
     ports:
       - "8071:8071"
@@ -284,7 +284,7 @@ services:
       OTEL_SERVICE_NAME: "configserver"
 
   eurekaserver:
-    image: "kbsanthosh/eurekaserver:13.0.0-RELEASE"
+    image: "kbsanthosh/eurekaserver:14.0.0-RELEASE"
     container_name: eurekaserver-rest-api
     ports:
       - "8070:8070"
@@ -302,7 +302,7 @@ services:
       service: microservice-configserver-config
 
   accounts:
-    image: "kbsanthosh/accounts:13.0.0-RELEASE"
+    image: "kbsanthosh/accounts:14.0.0-RELEASE"
     container_name: accounts-rest-api
       #ports:
     #- "8080:8080"
@@ -324,7 +324,7 @@ services:
       service: microservice-eureka-config
 
   loans:
-    image: "kbsanthosh/loans:13.0.0-RELEASE"
+    image: "kbsanthosh/loans:14.0.0-RELEASE"
     container_name: loans-rest-api
       #ports:
     #- "8090:8090"
@@ -342,7 +342,7 @@ services:
       service: microservice-eureka-config
 
   #  loans2:
-  #    image: "kbsanthosh/loans:13.0.0-RELEASE"
+  #    image: "kbsanthosh/loans:14.0.0-RELEASE"
   #    container_name: loans-rest-api-instance2
   #    ports:
   #      - "8091:8090"
@@ -360,7 +360,7 @@ services:
 
 
   cards:
-    image: "kbsanthosh/cards:13.0.0-RELEASE"
+    image: "kbsanthosh/cards:14.0.0-RELEASE"
     container_name: cards-rest-api
       #ports:
     #- "9010:9000" # UPDATED: Changed host port to 9010 to resolve the clash with MinIO
@@ -380,7 +380,7 @@ services:
 
 
   message:
-    image: "kbsanthosh/message:13.0.0-RELEASE"
+    image: "kbsanthosh/message:14.0.0-RELEASE"
     container_name: message-ms
     depends_on:
       rabbit:
@@ -392,7 +392,7 @@ services:
       service: network-deploy-service
 
   gatewayserver:
-    image: "kbsanthosh/gatewayserver:13.0.0-RELEASE"
+    image: "kbsanthosh/gatewayserver:14.0.0-RELEASE"
     container_name: gatewayserver-rest-api
     ports:
       - "8072:8072"
